@@ -17,21 +17,19 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const arr = [-2, -1, 0, 1, 2, 3];
 
-  const getData = async () => {
-    try {
-      const response: any = await axios.get(`https://give-me-users-forever.vercel.app/api/users/${(page - 1) * 10}/next`);
-      return response.data.users.splice(0, 10);
-    } catch (error: any) {
-      throw new Error(error.message);
-    }
-  }
-
   useEffect(() => {
+    const controller = new AbortController();
     const settingData = async () => {
-      const res = await getData();
-      setData(res);
+      try {
+        const response: any = await axios.get(`https://give-me-users-forever.vercel.app/api/users/${(page - 1) * 10}/next`, { signal: controller.signal });
+        const res = response.data.users.splice(0, 10);
+        setData(res);
+      } catch (error: any) {
+        return new Error(error.message);
+      }
     }
     settingData();
+    return ()=> controller.abort();
     // eslint-disable-next-line
   }, [page]);
 
